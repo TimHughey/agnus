@@ -1,4 +1,4 @@
-defmodule Time.Helper do
+defmodule Agnus.Time.Helper do
   @moduledoc false
   require Logger
   use Timex

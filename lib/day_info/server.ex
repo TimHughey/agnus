@@ -5,7 +5,7 @@ defmodule Agnus.DayInfo do
   use GenServer
   use Timex
 
-  use Config.Helper
+  use Agnus.Config.Helper
 
   #
   ## Macros
@@ -146,8 +146,7 @@ defmodule Agnus.DayInfo do
           starting_up: true
         } = s
       ) do
-    {:noreply, refresh_day_info(s) |> log_refresh_day_info(),
-     {:continue, {:startup_complete}}}
+    {:noreply, refresh_day_info(s) |> log_refresh_day_info(), {:continue, {:startup_complete}}}
   end
 
   @impl true
@@ -219,8 +218,7 @@ defmodule Agnus.DayInfo do
     url = Keyword.get(api_opts, :url, nil)
     lat_and_lng = Keyword.take(api_opts, [:lat, :lng])
 
-    params =
-      Keyword.merge(lat_and_lng, formatted: 0, date: today) |> Enum.into(%{})
+    params = Keyword.merge(lat_and_lng, formatted: 0, date: today) |> Enum.into(%{})
 
     with {:current, false} <- {:current, info_current?(s)},
          url when is_binary(url) <- url,

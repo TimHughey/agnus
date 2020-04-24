@@ -1,4 +1,4 @@
-defmodule Config.Helper do
+defmodule Agnus.Config.Helper do
   @moduledoc false
 
   require Logger
