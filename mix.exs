@@ -4,11 +4,16 @@ defmodule Agnus.MixProject do
   def project do
     [
       app: :agnus,
-      version: "0.1.0",
+      version: "0.0.1",
       elixir: "~> 1.10",
+      description: "Agnus",
       start_permanent: Mix.env() == :prod,
       deps: deps(),
-      releases: releases()
+      docs: docs(),
+      releases: releases(),
+      package: package(),
+      homepage_url: "https://www.wisslanding.com",
+      source_url: "https://github.com/TimHughey/agnus"
     ]
   end
 
@@ -31,18 +36,26 @@ defmodule Agnus.MixProject do
     ]
   end
 
-  defp deps do
-    [
+  defp deps,
+    do: [
       {:timex, "~> 3.0"},
       {:jason, "~> 1.0"},
-      {:httpoison, "~> 1.6"}
+      {:httpoison, "~> 1.6"},
+      {:credo, "> 0.0.0", only: [:dev, :test], runtime: false},
+      {:coverex, "~> 1.0", only: :test},
+      {:ex_doc, "~> 0.21", only: :dev, runtime: false}
       # {:dep_from_hexpm, "~> 0.3.0"},
       # {:dep_from_git, git: "https://github.com/elixir-lang/my_dep.git", tag: "0.1.0"}
     ]
-  end
 
-  defp releases do
-    [
+  defp docs,
+    do: [
+      main: "api-reference.html#modules",
+      extras: ["CHANGELOG.md"]
+    ]
+
+  defp releases,
+    do: [
       agnus: [
         include_erts: true,
         include_executables_for: [:unix],
@@ -51,5 +64,15 @@ defmodule Agnus.MixProject do
         steps: [:assemble, :tar]
       ]
     ]
-  end
+
+  defp package,
+    do: [
+      name: "agnus",
+      files: ~w(lib test
+            .credo.exs .formatter.exs mix.exs
+            COPYING* README* LICENSE* CHANGELOG*),
+      links: %{"GitHub" => "https://github.com/TimHughey/agnus"},
+      maintainers: ["Tim Hughey"],
+      licenses: ["LGPL-3.0-or-later"]
+    ]
 end
