@@ -13,12 +13,12 @@ defmodule Agnus.DayInfo do
 
   defmacrop if_latest_valid(state, do: if_block) do
     quote do
-      %{day_info: %{latest: latest}} = unquote(state)
+      %{day_info: %{latest: latest} = day_info} = unquote(state)
 
-      if is_map(latest) do
-        unquote(if_block)
-      else
+      if Map.has_key?(day_info, :error) or is_nil(latest) do
         false
+      else
+        unquote(if_block)
       end
     end
   end
@@ -191,10 +191,10 @@ defmodule Agnus.DayInfo do
     if_latest_valid(s) do
       import Timex, only: [day: 1, now: 1]
 
-      %{opts: opts, day_info: %{last_fetch: last_fetch}} = s
+      %{opts: opts, day_info: %{last_fetch: last_fetch} = day_info} = s
       tz = Keyword.get(opts, :tz)
 
-      if is_nil(last_fetch) do
+      if is_nil(last_fetch) or Map.has_key?(day_info, :error) do
         false
       else
         Timex.day(last_fetch) == Timex.day(now(tz))

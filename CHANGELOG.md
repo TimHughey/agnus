@@ -1,6 +1,6 @@
 # Change Log
 
-* v0.1.0
+## v0.0.2
   Initial version
 
   Extracted from Helen to create a separate application as part of the

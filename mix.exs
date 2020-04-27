@@ -12,7 +12,6 @@ defmodule Agnus.MixProject do
       docs: docs(),
       releases: releases(),
       package: package(),
-      homepage_url: "https://www.wisslanding.com",
       source_url: "https://github.com/TimHughey/agnus"
     ]
   end
@@ -50,8 +49,8 @@ defmodule Agnus.MixProject do
 
   defp docs,
     do: [
-      main: "api-reference.html#modules",
-      extras: ["CHANGELOG.md"]
+      main: "readme",
+      extras: ["README.md", "CHANGELOG.md"]
     ]
 
   defp releases,

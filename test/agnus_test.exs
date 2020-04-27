@@ -2,7 +2,9 @@ defmodule AgnusTest do
   use ExUnit.Case
   doctest Agnus
 
-  test "greets the world" do
-    assert Agnus.hello() == :world
+  test "server started" do
+    pid = GenServer.whereis(Agnus.DayInfo)
+
+    assert is_pid(pid)
   end
 end
