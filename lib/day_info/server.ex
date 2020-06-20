@@ -27,10 +27,36 @@ defmodule Agnus.DayInfo do
   ## Public API
   #
 
+  @doc """
+  Is the data available for today?
+
+  ## Examples
+
+      iex> Agnus.current?()
+      iex> true
+
+  """
   def current?(opts \\ []) when is_list(opts) do
     GenServer.call(__MODULE__, {:current?, opts})
   end
 
+  @doc """
+  Get all or some sun information for today
+
+  ## Examples
+
+      iex> info = Agnus.sun_info(:all)
+      iex> is_map(info)
+
+      iex> info = Agnus.sun_info(:astronomical_twilight_begin)
+      iex> Map.has_key?(info, :astronomical_twilight_begin)
+
+      iex> info =
+      ...>  Agnus.sun_info([:astronomical_twilight_begin, :astronomical_twilight_begin])
+      iex> Map.has_key?(info, :astronomical_twilight_begin)
+      iex> Map.has_key?(info, :astronomical_twilight_end)
+
+  """
   def get_info(:all) do
     state = state()
 
@@ -40,7 +66,9 @@ defmodule Agnus.DayInfo do
     end
   end
 
-  def get_info(key) when is_atom(key), do: get_info([key])
+  def get_info(key) when is_atom(key) do
+    get_info(:all) |> Map.get(key)
+  end
 
   def get_info(keys) when is_list(keys) do
     state = state()
@@ -51,6 +79,16 @@ defmodule Agnus.DayInfo do
     end
   end
 
+  @doc """
+  Get the sun info keys available
+
+  ## Examples
+
+      iex> keys = Agnus.keys()
+      iex> [:sunrise, :sunset] in keys
+      iex> Enum.count(keys) == 10
+
+  """
   def keys do
     state = state()
 
@@ -60,6 +98,7 @@ defmodule Agnus.DayInfo do
     end
   end
 
+  @doc false
   def last_refresh() do
     state = state()
 
@@ -69,8 +108,63 @@ defmodule Agnus.DayInfo do
     end
   end
 
+  @doc false
   def state, do: :sys.get_state(__MODULE__)
 
+  ##
+  ## Specific Sun Info Key Access
+  ##
+
+  @doc """
+  Get noon
+
+  ## Examples
+
+      iex> noon = Agnus.noon()
+      iex> %DateTime{} = sunrise
+  """
+  @doc since: "0.0.3"
+  def noon do
+    get_info(:all) |> Map.get(:noon)
+  end
+
+  @doc """
+  Get sunrise
+
+  ## Examples
+
+      iex> sunrise = Agnus.sunrise()
+      iex> %DateTime{} = sunrise
+  """
+  @doc since: "0.0.3"
+  def sunrise do
+    get_info(:all) |> Map.get(:sunrise)
+  end
+
+  @doc """
+  Get sunset
+
+  ## Examples
+
+      iex> sunet = Agnus.sunset()
+      iex> %DateTime{} = sunset
+  """
+  @doc since: "0.0.3"
+  def sunset do
+    get_info(:all) |> Map.get(:sunset)
+  end
+
+  @doc """
+  Trigger a refresh of the sun info for today
+
+  ## Examples
+
+      iex> :ok = Agnus.trigger_sun_info_refresh()
+
+  > The most recent data is cached and, as such, repeated calls to this function
+  > on the same day are no ops.
+
+  """
   def trigger_day_info_refresh(opts \\ []) when is_list(opts),
     do: GenServer.cast(__MODULE__, {:action, :day_refresh, opts})
 
@@ -78,19 +172,25 @@ defmodule Agnus.DayInfo do
   ## GenServer Start, Init and Terminate Callbacks
   #
 
+  @doc false
   def start_link(args) when is_list(args) do
+    import Agnus.Time.Helper, only: [utc_now: 0]
+
     GenServer.start_link(
       __MODULE__,
       Map.merge(Enum.into(args, %{}), %{
         autostart: Keyword.get(args, :autostart, true),
         opts: module_opts(default_opts()),
         day_info: %{last_fetch: nil, latest: %{}, previous: %{}},
-        starting_up: true
+        starting_up: true,
+        timeouts: 0,
+        last_timeout: utc_now()
       }),
       name: __MODULE__
     )
   end
 
+  @doc false
   @impl true
   def init(%{autostart: autostart, opts: _opts} = s) do
     log?(s, :init_args) && Logger.info(["init():\n", inspect(s, pretty: true)])
@@ -104,6 +204,7 @@ defmodule Agnus.DayInfo do
     end
   end
 
+  @doc false
   @impl true
   def terminate(reason, s) do
     log?(s, :init) &&
@@ -114,29 +215,34 @@ defmodule Agnus.DayInfo do
   ## GenServer Handle Callbacks
   #
 
+  @doc false
   @impl true
   def handle_call(
         {:current?, _opts},
         _from,
         %{day_info: %{last_fetch: _last_fetch}} = s
       ) do
-    {:reply, info_current?(s), s}
+    reply(info_current?(s), s)
   end
 
+  @doc false
   @impl true
-  def handle_call(catchall, _from, s), do: {:reply, {:bad_call, catchall}, s}
+  def handle_call(catchall, _from, s), do: reply({:bad_call, catchall}, s)
 
+  @doc false
   @impl true
   def handle_cast({:action, :day_refresh, _opts}, %{} = s) do
-    {:noreply, refresh_day_info(s)}
+    noreply(refresh_day_info(s))
   end
 
+  @doc false
   @impl true
   def handle_cast(catchall, s) do
     Logger.warn(["handle_cast() unhandled:\n", inspect(catchall, pretty: true)])
-    {:noreply, s}
+    noreply(s)
   end
 
+  @doc false
   @impl true
   def handle_continue(
         {:startup},
@@ -146,16 +252,31 @@ defmodule Agnus.DayInfo do
           starting_up: true
         } = s
       ) do
-    {:noreply, refresh_day_info(s) |> log_refresh_day_info(), {:continue, {:startup_complete}}}
+    state = refresh_day_info(s) |> log_refresh_day_info()
+
+    # NOTE  no timeout required here
+    {:noreply, state, {:continue, {:startup_complete}}}
   end
 
+  @doc false
   @impl true
   def handle_continue(
         {:startup_complete},
         %{opts: _opts, starting_up: true} = s
       ) do
     log?(s, :init) && Logger.info(["startup complete"])
-    {:noreply, Map.put(s, :starting_up, false)}
+
+    noreply(put_in(s[:starting_up], false))
+  end
+
+  @doc false
+  @impl true
+  def handle_info(:timeout, state) do
+    import Agnus.Time.Helper, only: [utc_now: 0]
+
+    state
+    |> update_last_timeout()
+    |> timeout_hook()
   end
 
   #
@@ -256,6 +377,42 @@ defmodule Agnus.DayInfo do
     end
   end
 
+  ##
+  ## GenServer Receive Loop Hooks
+  ##
+
+  defp timeout_hook(%{opts: opts} = s) do
+    GenServer.cast(__MODULE__, {:action, :day_refresh, opts})
+    noreply(s)
+  end
+
+  ##
+  ## State Helpers
+  ##
+
+  defp loop_timeout(%{opts: opts}) do
+    import Agnus.Time.Helper, only: [list_to_ms: 2]
+
+    list_to_ms(opts[:timeout], minutes: 1)
+  end
+
+  defp update_last_timeout(s) do
+    import Agnus.Time.Helper, only: [utc_now: 0]
+
+    %{
+      s
+      | last_timeout: utc_now(),
+        timeouts: Map.update(s, :timeouts, 1, &(&1 + 1))
+    }
+  end
+
+  ##
+  ## handle_* return helpers
+  ##
+
+  defp noreply(s), do: {:noreply, s, loop_timeout(s)}
+  defp reply(val, s), do: {:reply, val, s, loop_timeout(s)}
+
   #
   ## Constants
   #
@@ -276,7 +433,7 @@ defmodule Agnus.DayInfo do
   #
   defp log_refresh_day_info(%{day_info: %{error: error}} = s) do
     Logger.warn([
-      "could not fetch day info:\n",
+      "could not fetch sun info:\n",
       inspect(error, pretty: true)
     ])
 

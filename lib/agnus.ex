@@ -3,58 +3,24 @@ defmodule Agnus do
   `Agnus` is [Sunrise Sunset](https://sunrise-sunset.org) wrapped in an Elixir supervised GenServer.
   """
 
-  @doc """
-  Is the data available for today?
-
-  ## Examples
-
-      iex> Agnus.current?()
-      iex> true
-
-  """
+  @doc delegate_to: {Agnus.DayInfo, :current?, 0}
   defdelegate current?, to: Agnus.DayInfo
 
-  @doc """
-  Get all or some sun information for today
-
-  ## Examples
-
-      iex> info = Agnus.sun_info(:all)
-      iex> is_map(info)
-
-      iex> info = Agnus.sun_info(:astronomical_twilight_begin)
-      iex> Map.has_key?(info, :astronomical_twilight_begin)
-
-      iex> info =
-      ...>  Agnus.sun_info([:astronomical_twilight_begin, :astronomical_twilight_begin])
-      iex> Map.has_key?(info, :astronomical_twilight_begin)
-      iex> Map.has_key?(info, :astronomical_twilight_end)
-
-  """
+  @doc delegate_to: {Agnus.DayInfo, :sun_info, 1}
   defdelegate sun_info(term), to: Agnus.DayInfo, as: :get_info
 
-  @doc """
-  Get the sun info keys available
-
-  ## Examples
-
-      iex> keys = Agnus.keys()
-      iex> [:sunrise, :sunset] in keys
-      iex> Enum.count(keys) == 10
-
-  """
+  @doc delegate_to: {Agnus.DayInfo, :keys, 0}
   defdelegate keys, to: Agnus.DayInfo
 
-  @doc """
-  Trigger a refresh of the sun info for today
-
-  ## Examples
-
-      iex> :ok = Agnus.trigger_sun_info_refresh()
-
-  > The most recent data is cached and, as such, repeated calls to this function
-  > on the same day are no ops.
-
-  """
+  @doc delegate_to: {Agnus.DayInfo, :trigger_day_info_refresh, 0}
   defdelegate trigger_sun_info_refresh, to: Agnus.DayInfo, as: :trigger_day_info_refresh
+
+  @doc delegate_to: {Agnus.DayInfo, :noon, 0}
+  defdelegate noon, to: Agnus.DayInfo
+
+  @doc delegate_to: {Agnus.DayInfo, :sunrise, 0}
+  defdelegate sunrise, to: Agnus.DayInfo
+
+  @doc delegate_to: {Agnus.DayInfo, :sunset, 0}
+  defdelegate sunset, to: Agnus.DayInfo
 end
