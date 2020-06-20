@@ -125,7 +125,7 @@ defmodule Agnus.DayInfo do
   """
   @doc since: "0.0.3"
   def noon do
-    get_info(:all) |> Map.get(:noon)
+    get_info(:all) |> Map.get(:solar_noon)
   end
 
   @doc """
