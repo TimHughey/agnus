@@ -266,7 +266,8 @@ defmodule Agnus.DayInfo do
       ) do
     log?(s, :init) && Logger.info(["startup complete"])
 
-    noreply(put_in(s[:starting_up], false))
+    put_in(s[:starting_up], false)
+    |> noreply()
   end
 
   @doc false
@@ -399,11 +400,8 @@ defmodule Agnus.DayInfo do
   defp update_last_timeout(s) do
     import Agnus.Time.Helper, only: [utc_now: 0]
 
-    %{
-      s
-      | last_timeout: utc_now(),
-        timeouts: Map.update(s, :timeouts, 1, &(&1 + 1))
-    }
+    put_in(s[:last_timeout], utc_now())
+    |> Map.update(:timeouts, 1, &(&1 + 1))
   end
 
   ##
