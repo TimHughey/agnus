@@ -316,10 +316,20 @@ defmodule Agnus.DayInfo do
       %{opts: opts, day_info: %{last_fetch: last_fetch} = day_info} = s
       tz = Keyword.get(opts, :tz)
 
-      if is_nil(last_fetch) or Map.has_key?(day_info, :error) do
-        false
-      else
-        Timex.day(last_fetch) == Timex.day(now(tz))
+      cond do
+        is_nil(last_fetch) or Map.has_key?(day_info, :error) ->
+          false
+
+        day(last_fetch) != day(now(tz)) ->
+          # suninfo is not current.  send ourself a message to
+          # do an update because the timeout based update is likely
+          # being starved by frequent requests from other processes.
+          GenServer.cast(__MODULE__, {:action, :day_refresh})
+          false
+
+        true ->
+          true
+          # the info is current
       end
     end
   end
