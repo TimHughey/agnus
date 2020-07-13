@@ -324,7 +324,7 @@ defmodule Agnus.DayInfo do
           # suninfo is not current.  send ourself a message to
           # do an update because the timeout based update is likely
           # being starved by frequent requests from other processes.
-          GenServer.cast(__MODULE__, {:action, :day_refresh})
+          GenServer.cast(__MODULE__, {:action, :day_refresh, []})
           false
 
         true ->
