@@ -1,5 +1,7 @@
 defmodule Agnus.DayInfo do
-  @moduledoc false
+  @moduledoc """
+  Agnus Dayinfo Server
+  """
 
   require Logger
   use GenServer
@@ -99,7 +101,7 @@ defmodule Agnus.DayInfo do
   end
 
   @doc false
-  def last_refresh() do
+  def last_refresh do
     state = state()
 
     if_latest_valid(state) do
@@ -339,7 +341,7 @@ defmodule Agnus.DayInfo do
     import Jason, only: [decode: 2]
     import Timex, only: [now: 1, to_date: 1]
 
-    alias HTTPoison.{Response}
+    alias HTTPoison.Response
 
     tz = Keyword.get(opts, :tz, "America/New_York")
 
