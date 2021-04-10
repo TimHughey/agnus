@@ -2,11 +2,10 @@
 
 Agnus is [Sunrise Sunset](https://sunrise-sunset.org) wrapped in an Elixir supervised GenServer.
 
-* Self contained application when added as a dependency
-* Simple configuration of lat, long and timezone of physical location of interest
-* Caches the current day info to minimize calls to the API
-* Returns a map of the data returned by the [Sunrise Sunset API](https://sunrise-sunset.org/api)
-
+- Self contained application when added as a dependency
+- Simple configuration of lat, long and timezone of physical location of interest
+- Caches the current day info to minimize calls to the API
+- Returns a map of the data returned by the [Sunrise Sunset API](https://sunrise-sunset.org/api)
 
 ## Installation
 
@@ -15,7 +14,7 @@ Install the package by adding `agnus` to your list of dependencies in `mix.exs`:
 ```elixir
 def deps do
   [
-    {:agnus, "~> 0.0.2"}
+    {:agnus, "~> 0.1.0"}
   ]
 end
 ```
@@ -48,8 +47,8 @@ See [Sunrise Sunset](https://sunrise-sunset.org) for details on the data availab
 > beginning and end of the phase of the visibility of the sun and the light
 > we see.
 >
-> * For the time sun dims look at the `*_end` keys.
-> * For the time when the sun shines look at the `*_begin` keys.
+> - For the time sun dims look at the `*_end` keys.
+> - For the time when the sun shines look at the `*_begin` keys.
 >
 > This could be obvious to everyone however it took a moment of
 > confusion for me to see the nuance.

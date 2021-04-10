@@ -1,11 +1,13 @@
 defmodule Agnus.MixProject do
+  @moduledoc false
+
   use Mix.Project
 
   def project do
     [
       app: :agnus,
-      version: "0.0.6",
-      elixir: "~> 1.10",
+      version: "0.1.0",
+      elixir: "~> 1.11",
       description: "Agnus",
       start_permanent: Mix.env() == :prod,
       deps: deps(),
