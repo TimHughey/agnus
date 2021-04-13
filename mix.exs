@@ -3,18 +3,27 @@ defmodule Agnus.MixProject do
 
   use Mix.Project
 
+  @version "0.1.1"
+
   def project do
     [
       app: :agnus,
-      version: "0.1.0",
-      elixir: "~> 1.11",
+      version: @version,
+      elixir: "~> 1.8",
       description: "Agnus",
       start_permanent: Mix.env() == :prod,
       deps: deps(),
       docs: docs(),
       releases: releases(),
       package: package(),
-      source_url: "https://github.com/TimHughey/agnus"
+      source_url: "https://github.com/TimHughey/agnus",
+      test_coverage: [tool: ExCoveralls],
+      preferred_cli_env: [
+        coveralls: :test,
+        "coveralls.detail": :test,
+        "coveralls.post": :test,
+        "coveralls.html": :test
+      ]
     ]
   end
 
@@ -23,17 +32,7 @@ defmodule Agnus.MixProject do
     [
       extra_applications: [:logger],
       mod: {Agnus.Application, []},
-      env: [
-        day_info: [
-          log: [init: false, init_args: false],
-          tz: "America/New_York",
-          api: [
-            url: "https://api.sunrise-sunset.org",
-            lat: 40.2108,
-            lng: -74.011
-          ]
-        ]
-      ]
+      env: [day_info: []]
     ]
   end
 
@@ -43,16 +42,21 @@ defmodule Agnus.MixProject do
       {:jason, "~> 1.0"},
       {:httpoison, "~> 1.6"},
       {:credo, "> 0.0.0", only: [:dev, :test], runtime: false},
-      {:coverex, "~> 1.0", only: :test},
-      {:ex_doc, "~> 0.21", only: :dev, runtime: false}
-      # {:dep_from_hexpm, "~> 0.3.0"},
-      # {:dep_from_git, git: "https://github.com/elixir-lang/my_dep.git", tag: "0.1.0"}
+      {:ex_doc, "~> 0.21", only: :dev, runtime: false},
+      {:excoveralls, "~> 0.10", only: :test}
     ]
 
   defp docs,
     do: [
-      main: "readme",
-      extras: ["README.md", "CHANGELOG.md"]
+      main: "this-is-agnus",
+      formatter_opts: [gfm: true],
+      source_ref: @version,
+      source_url: "https://github.com/TimHughey/agnus",
+      extras: [
+        "docs/This Is Agnus.md",
+        "docs/Basic Usage.md",
+        "CHANGELOG.md"
+      ]
     ]
 
   defp releases,

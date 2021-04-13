@@ -1,5 +1,13 @@
 # Change Log
 
+## v0.1.1
+
+- Documentation improvements
+- Created @spec for public api
+- Implemented 'Fetcher' to separate data queries and fetching of sun information
+- Swapped in coveralls and removed coverex
+- Increased testing coverage to >99%
+
 ## v0.1.0
 
 External dependency update
