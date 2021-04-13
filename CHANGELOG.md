@@ -1,5 +1,9 @@
 # Change Log
 
+## v0.1.2
+
+- When local cache file exists don't fetch sun info unless out of date
+
 ## v0.1.1
 
 - Documentation improvements

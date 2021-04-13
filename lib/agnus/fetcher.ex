@@ -11,12 +11,32 @@ defmodule Agnus.Fetcher do
   alias Agnus.Opts
 
   def start_link(_args) do
-    init_state = %{reply_to: nil, opts: %{}, body: nil, last_fetch: Timex.zero()}
+    init_state = %{
+      reply_to: nil,
+      opts: %{},
+      body: nil,
+      last_fetch: nil
+    }
+
     GenServer.start_link(__MODULE__, Opts.put(init_state), name: __MODULE__)
   end
 
+  # (1 of 2) cache file opt is set
+  @impl true
+  def init(%{opts: %{cache_file: cf}} = s) when is_binary(cf) do
+    if File.exists?(cf) do
+      # cache file exists, let Agnus.Server sort out if fetch is necessary
+      {:ok, s}
+    else
+      # cache file does not exist, a fetch is definitely necessary
+      {:ok, s, {:continue, :startup}}
+    end
+  end
+
+  # (2 of 2) cache file opt is not set (or nil)
   @impl true
   def init(s) do
+    # always do an initial fetch, Agnus Server will ask us for it
     {:ok, s, {:continue, :startup}}
   end
 
@@ -37,6 +57,12 @@ defmodule Agnus.Fetcher do
     {:noreply, fetch_json_reschedule_if_needed(s)}
   end
 
+  # (1 of 2) startup with existing cache file (no fetch ever performed)
+  def fetch_if_needed(%{last_fetch: nil} = s) do
+    fetch_json_reschedule_if_needed(s)
+  end
+
+  # (2 of 2) previous fetch
   def fetch_if_needed(%{last_fetch: %DateTime{} = last_fetch} = s) do
     timeout = timeout_ms(s)
 

@@ -150,7 +150,7 @@ defmodule Agnus.Server do
   end
 
   def clear_dayinfo_latest(s) do
-    put_in(s, [:dayinfo, :last_fetch], Timex.zero())
+    put_in(s, [:dayinfo, :last_fetch], nil)
     |> put_in([:dayinfo, :latest], nil)
   end
 
