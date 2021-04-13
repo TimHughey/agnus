@@ -2,6 +2,7 @@
 
 [![Hex.pm Version](http://img.shields.io/hexpm/v/agnus.svg?style=flat)](https://hex.pm/packages/agnus)
 [![Coverage Status](https://coveralls.io/repos/github/TimHughey/agnus/badge.svg?branch=master)](https://coveralls.io/github/TimHughey/agnus?branch=master)
+[![test](https://github.com/TimHughey/agnus/actions/workflows/test.yaml/badge.svg)](https://github.com/TimHughey/agnus/actions/workflows/test.yaml)
 
 Agnus is [Sunrise Sunset](https://sunrise-sunset.org) wrapped in an Elixir supervised GenServer.
 
